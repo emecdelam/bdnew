@@ -14,12 +14,14 @@ def get_db():
     finally:
         db.close()
 
-# List BDs with pagination and search
+# List BDs with pagination, search, and sorting
 @router.get("/bds/", response_model=list[schemas.BDBase])
 def list_bds(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(20, ge=1, le=100, description="Number of records to return"),
     search: Optional[str] = Query(None, description="Search term for filtering"),
+    sort_field: Optional[str] = Query(None, description="Field to sort by"),
+    sort_order: Optional[str] = Query("asc", description="Sort order: asc or desc"),
     db: Session = Depends(get_db)
 ):
     query = db.query(models.BD)
@@ -35,19 +37,43 @@ def list_bds(
                 models.BD.dessinateur.ilike(search_term),
                 models.BD.editeur.ilike(search_term),
                 models.BD.collection.ilike(search_term),
-                models.BD.genre.ilike(search_term)
+                models.BD.genre.ilike(search_term),
+                models.BD.cote.ilike(search_term)
             )
         )
-    # Apply sorting by title
     
-    # Replace the current ordering with:
-    query = query.order_by(
-    models.BD.titreserie.is_(None),         # NULLs last
-    models.BD.titreserie == '',             # Empty strings last
-    models.BD.titreserie.asc(),             # Then sort by titreserie
-    cast(models.BD.numtome, Integer).asc()  # Then by numtome as integer
-    )
-    # Apply pagination
+    # Apply sorting
+    if sort_field and hasattr(models.BD, sort_field):
+        column = getattr(models.BD, sort_field)
+        if sort_field == 'numtome':
+            # Special handling for numtome to sort as integers
+            if sort_order == "desc":
+                query = query.order_by(cast(column, Integer).desc())
+            else:
+                query = query.order_by(cast(column, Integer).asc())
+        else:
+            # For other fields, handle nulls and empty strings
+            if sort_order == "desc":
+                query = query.order_by(
+                    column.is_(None).desc(),
+                    (column == '').desc(),
+                    column.desc()
+                )
+            else:
+                query = query.order_by(
+                    column.is_(None),
+                    column == '',
+                    column.asc()
+                )
+    else:
+        # Default sorting
+        query = query.order_by(
+            models.BD.titreserie.is_(None),
+            models.BD.titreserie == '',
+            models.BD.titreserie.asc(),
+            cast(models.BD.numtome, Integer).asc()
+        )
+    
     return query.offset(skip).limit(limit).all()
 
 # Get single BD by ID
@@ -66,6 +92,33 @@ def list_membres(
     db: Session = Depends(get_db)
 ):
     return db.query(models.Membres).offset(skip).limit(limit).all()
+
+# Get BD statistics and total count
+@router.get("/bds/count")
+def get_bds_count(
+    search: Optional[str] = Query(None, description="Search term for filtering"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.BD)
+    
+    # Apply search filter if provided
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                models.BD.titrealbum.ilike(search_term),
+                models.BD.titreserie.ilike(search_term),
+                models.BD.scenariste.ilike(search_term),
+                models.BD.dessinateur.ilike(search_term),
+                models.BD.editeur.ilike(search_term),
+                models.BD.collection.ilike(search_term),
+                models.BD.genre.ilike(search_term),
+                models.BD.cote.ilike(search_term)
+            )
+        )
+    
+    total = query.count()
+    return {"total": total}
 
 # Get BD statistics
 @router.get("/stats/")
