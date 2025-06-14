@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, cast, Integer
 from typing import Optional
 from . import models, schemas
 from .database import SessionLocal
@@ -38,7 +38,15 @@ def list_bds(
                 models.BD.genre.ilike(search_term)
             )
         )
+    # Apply sorting by title
     
+    # Replace the current ordering with:
+    query = query.order_by(
+    models.BD.titreserie.is_(None),         # NULLs last
+    models.BD.titreserie == '',             # Empty strings last
+    models.BD.titreserie.asc(),             # Then sort by titreserie
+    cast(models.BD.numtome, Integer).asc()  # Then by numtome as integer
+    )
     # Apply pagination
     return query.offset(skip).limit(limit).all()
 
