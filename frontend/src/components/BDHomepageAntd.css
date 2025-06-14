@@ -55,14 +55,6 @@
 /* Content - Fixed height for scrolling */
 .bd-content-antd {
   padding: 0;
-  height: calc(100vh - 120px);
-  overflow: hidden;
-}
-
-.table-scroll-container {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: auto;
 }
 
 /* Table - Minimal and Dense with scroll */
@@ -91,6 +83,9 @@
   color: #555;
   padding: 8px 6px;
   text-align: left;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
 }
 
 .bd-table-antd .ant-table-thead > tr > th:first-child {

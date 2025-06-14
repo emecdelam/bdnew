@@ -16,7 +16,7 @@ const BDHomepage = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [sortInfo, setSortInfo] = useState({});
   
-  const pageSize = 25;
+  const pageSize = 100; // Number of items per page
 
   const API_BASE_URL = 'http://localhost:8000';
 
@@ -208,8 +208,9 @@ const BDHomepage = () => {
 
   // Scroll event handler for infinite loading
   const handleScroll = useCallback((e) => {
-    const { target } = e;
-    const { scrollTop, scrollHeight, clientHeight } = target;
+    // For Ant Design Table, the scroll target might be different
+    const scrollContainer = e.target.closest('.ant-table-body') || e.target;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
     
     // Check if we're near the bottom (within 100px)
     if (scrollHeight - scrollTop - clientHeight < 100 && hasMore && !loadingMore) {
@@ -285,45 +286,42 @@ const BDHomepage = () => {
       </div>
 
       <div className="bd-content-antd">
-        <div 
-          className="table-scroll-container"
+        <Table
+          columns={columns}
+          dataSource={bds}
+          rowKey="bid"
+          loading={loading}
+          pagination={false}
+          onChange={handleTableChange}
+          scroll={{ 
+            x: 800,
+            y: 'calc(100vh - 160px)'
+          }}
+          size="small"
+          bordered={false}
+          className="bd-table-antd"
           onScroll={handleScroll}
-        >
-          <Table
-            columns={columns}
-            dataSource={bds}
-            rowKey="bid"
-            loading={loading}
-            pagination={false}
-            onChange={handleTableChange}
-            scroll={{ 
-              x: 800
-            }}
-            size="small"
-            bordered={false}
-            className="bd-table-antd"
-          />
-          {loadingMore && (
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '16px',
-              background: '#fafafa',
-              borderTop: '1px solid #e8e8e8'
-            }}>
-              <Text type="secondary">Chargement...</Text>
-            </div>
-          )}
-          {!hasMore && bds.length > 0 && (
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '16px',
-              background: '#fafafa',
-              borderTop: '1px solid #e8e8e8'
-            }}>
-              <Text type="secondary">Toutes les BD ont été affichées</Text>
-            </div>
-          )}
-        </div>
+        />
+        {loadingMore && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '16px',
+            background: '#fafafa',
+            borderTop: '1px solid #e8e8e8'
+          }}>
+            <Text type="secondary">Chargement...</Text>
+          </div>
+        )}
+        {!hasMore && bds.length > 0 && (
+          <div style={{ 
+            textAlign: 'center', 
+            padding: '16px',
+            background: '#fafafa',
+            borderTop: '1px solid #e8e8e8'
+          }}>
+            <Text type="secondary">Toutes les BD ont été affichées</Text>
+          </div>
+        )}
       </div>
     </div>
   );
