@@ -30,7 +30,8 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
-/backend/venv
+backend/venv
+backend/**/__pycache__/
 
 # Environment variables
 .env
