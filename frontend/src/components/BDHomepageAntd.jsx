@@ -12,26 +12,27 @@ const BDHomepage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 50,
+    pageSize: 25,
     total: 0,
     showSizeChanger: true,
-    showQuickJumper: true,
-    showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total} BDs`,
+    showQuickJumper: false,
+    showTotal: (total, range) => `${range[0]}-${range[1]} sur ${total}`,
+    pageSizeOptions: ['10', '25', '50'],
   });
   const [sortInfo, setSortInfo] = useState({});
 
   const API_BASE_URL = 'http://localhost:8000';
 
-  // Column definitions
+  // Column definitions with mobile-first responsive design
   const columns = useMemo(() => [
     {
       title: 'Cote',
       dataIndex: 'cote',
       key: 'cote',
-      width: 120,
+      width: 80,
       sorter: true,
       render: (text) => (
-        <Tag color="blue" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+        <Tag color="blue" style={{ fontFamily: 'monospace', fontSize: '10px' }}>
           {text}
         </Tag>
       ),
@@ -40,77 +41,82 @@ const BDHomepage = () => {
       title: 'Série',
       dataIndex: 'titreserie',
       key: 'titreserie',
-      width: 200,
+      width: 120,
       sorter: true,
       render: (text) => text || <Text type="secondary">-</Text>,
       ellipsis: true,
     },
     {
-      title: 'Titre Album',
+      title: 'Titre',
       dataIndex: 'titrealbum',
       key: 'titrealbum',
-      width: 250,
+      width: 140,
       sorter: true,
       render: (text) => (
-        <Text strong>{text || 'Album sans titre'}</Text>
+        <Text strong style={{ fontSize: '12px' }}>{text || 'Sans titre'}</Text>
       ),
       ellipsis: true,
     },
     {
-      title: 'Tome',
+      title: 'T.',
       dataIndex: 'numtome',
       key: 'numtome',
-      width: 80,
+      width: 40,
       sorter: true,
       align: 'center',
       render: (text) => text ? (
-        <Tag color="red" style={{ fontWeight: 'bold' }}>{text}</Tag>
-      ) : <Text type="secondary">-</Text>,
+        <Tag color="red" style={{ fontSize: '9px' }}>{text}</Tag>
+      ) : <Text type="secondary" style={{ fontSize: '10px' }}>-</Text>,
     },
     {
       title: 'Scénariste',
       dataIndex: 'scenariste',
       key: 'scenariste',
-      width: 180,
+      width: 100,
       sorter: true,
       ellipsis: true,
+      responsive: ['sm'],
     },
     {
       title: 'Dessinateur',
       dataIndex: 'dessinateur',
       key: 'dessinateur',
-      width: 180,
+      width: 100,
       sorter: true,
       ellipsis: true,
+      responsive: ['sm'],
     },
     {
       title: 'Éditeur',
       dataIndex: 'editeur',
       key: 'editeur',
-      width: 150,
+      width: 90,
       sorter: true,
       render: (text) => text || <Text type="secondary">-</Text>,
       ellipsis: true,
+      responsive: ['md'],
     },
     {
       title: 'Collection',
       dataIndex: 'collection',
       key: 'collection',
-      width: 140,
+      width: 90,
       sorter: true,
       render: (text) => text || <Text type="secondary">-</Text>,
       ellipsis: true,
+      responsive: ['lg'],
     },
     {
       title: 'Genre',
       dataIndex: 'genre',
       key: 'genre',
-      width: 120,
+      width: 70,
       sorter: true,
       render: (text) => text ? (
-        <Tag color="green">{text}</Tag>
-      ) : <Text type="secondary">-</Text>,
+        <Tag color="green" style={{ fontSize: '9px' }}>{text}</Tag>
+      ) : <Text type="secondary" style={{ fontSize: '10px' }}>-</Text>,
       ellipsis: true,
+      responsive: ['lg'],
     },
   ], []);
 
@@ -136,7 +142,7 @@ const BDHomepage = () => {
     try {
       const {
         current = 1,
-        pageSize = 50,
+        pageSize = 25,
         search = searchTerm,
         sortField,
         sortOrder
@@ -183,7 +189,7 @@ const BDHomepage = () => {
 
   // Initial load
   useEffect(() => {
-    fetchBDs({ current: 1, pageSize: 50 });
+    fetchBDs({ current: 1, pageSize: 25 });
   }, []);
 
   // Handle search with debounce
@@ -230,13 +236,13 @@ const BDHomepage = () => {
         
         <Space.Compact size="large" className="search-container">
           <Input
-            placeholder="Rechercher par titre, auteur, série..."
+            placeholder="Rechercher..."
             prefix={<SearchOutlined />}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             allowClear
-            size="large"
-            style={{ width: 400 }}
+            size="middle"
+            style={{ width: '100%' }}
           />
         </Space.Compact>
       </div>
@@ -249,9 +255,9 @@ const BDHomepage = () => {
           loading={loading}
           pagination={pagination}
           onChange={handleTableChange}
-          scroll={{ x: 1200 }}
-          size="middle"
-          bordered
+          scroll={{ x: 800 }}
+          size="small"
+          bordered={false}
           className="bd-table-antd"
         />
       </div>
