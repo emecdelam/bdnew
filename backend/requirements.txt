@@ -1,0 +1,7 @@
+# Backend requirements
+fastapi
+uvicorn[standard]
+sqlalchemy
+pydantic
+mysqlclient
+python-dotenv
