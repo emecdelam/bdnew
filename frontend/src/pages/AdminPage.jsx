@@ -27,7 +27,7 @@ import { UserContext } from '../context/UserContext';
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-const AdminControlPanel = () => {
+const AdminPage = () => {
   const { currentUser } = useContext(UserContext);
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('bds');
@@ -206,4 +206,4 @@ const AdminControlPanel = () => {
   );
 };
 
-export default AdminControlPanel;
+export default AdminPage;

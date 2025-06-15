@@ -5,7 +5,7 @@ import { InfoCircleOutlined, HeartOutlined, BookOutlined, ArrowLeftOutlined } fr
 
 const { Title, Paragraph, Text } = Typography;
 
-const About = () => {
+const AboutPage = () => {
   const navigate = useNavigate();
 
   return (
@@ -25,8 +25,8 @@ const About = () => {
         </Button>
       </div>
         
-        <Card>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+      <Card>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
             <div style={{ textAlign: 'center', marginBottom: '30px' }}>
               <Title level={1} style={{ color: '#1890ff', marginBottom: '8px' }}>
                 <BookOutlined /> Sur Nous
@@ -93,8 +93,7 @@ const About = () => {
           </Space>
         </Card>
       </div>
-    </div>
   );
 };
 
-export default About;
+export default AboutPage;

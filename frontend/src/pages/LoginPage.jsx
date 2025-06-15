@@ -24,7 +24,7 @@ import { UserContext } from '../context/UserContext';
 
 const { Title, Text } = Typography;
 
-const Login = () => {
+const LoginPage = () => {
   const { handleLoginSuccess } = useContext(UserContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -420,4 +420,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;

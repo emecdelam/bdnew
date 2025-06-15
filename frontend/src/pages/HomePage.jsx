@@ -12,11 +12,11 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
-import './BDHomepageAntd.css';
+import '../components/BDHomepageAntd.css';
 
 const { Title, Text } = Typography;
 
-const BDHomepage = () => {
+const HomePage = () => {
   const { currentUser } = useContext(UserContext);
   const [bds, setBds] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -352,8 +352,7 @@ const BDHomepage = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 
-export default BDHomepage;
+export default HomePage;
