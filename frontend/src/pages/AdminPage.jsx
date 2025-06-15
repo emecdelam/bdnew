@@ -23,6 +23,7 @@ import {
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import { UserContext } from '../context/UserContext';
+import '../styles/pages/AdminPage.css';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;

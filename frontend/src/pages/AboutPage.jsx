@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Typography, Card, Space, Divider, Button } from 'antd';
 import { InfoCircleOutlined, HeartOutlined, BookOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import '../styles/pages/AboutPage.css';
 
 const { Title, Paragraph, Text } = Typography;
 

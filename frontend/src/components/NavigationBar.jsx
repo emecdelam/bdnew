@@ -10,7 +10,7 @@ import {
   LoginOutlined,
 } from '@ant-design/icons';
 import { UserContext } from '../context/UserContext';
-import './NavigationBar.css';
+import '../styles/components/NavigationBar.css';
 
 const NavigationBar = () => {
   const { currentUser, isAuthenticated, handleLogout } = useContext(UserContext);

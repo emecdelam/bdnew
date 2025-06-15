@@ -21,6 +21,7 @@ import {
   UserAddOutlined
 } from '@ant-design/icons';
 import { UserContext } from '../context/UserContext';
+import '../styles/pages/LoginPage.css';
 
 const { Title, Text } = Typography;
 

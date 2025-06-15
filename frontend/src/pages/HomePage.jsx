@@ -12,7 +12,7 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 import { UserContext } from '../context/UserContext';
-import '../components/BDHomepageAntd.css';
+import '../styles/pages/HomePage.css';
 
 const { Title, Text } = Typography;
 
