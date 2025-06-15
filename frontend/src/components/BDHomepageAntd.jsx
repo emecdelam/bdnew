@@ -1,12 +1,21 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Table, Input, Typography, Space, Tag, Menu, Button } from 'antd';
-import { SearchOutlined, UserOutlined, HomeOutlined, TeamOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { 
+  SearchOutlined, 
+  UserOutlined, 
+  HomeOutlined, 
+  TeamOutlined, 
+  InfoCircleOutlined,
+  SettingOutlined,
+  LogoutOutlined,
+  BookOutlined 
+} from '@ant-design/icons';
 import axios from 'axios';
 import './BDHomepageAntd.css';
 
 const { Title, Text } = Typography;
 
-const BDHomepage = ({ onNavigate }) => {
+const BDHomepage = ({ onNavigate, isAuthenticated, currentUser, onLogout }) => {
   const [bds, setBds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -273,6 +282,7 @@ const BDHomepage = ({ onNavigate }) => {
   };
 
   // Menu items configuration
+  // Menu items configuration - includes admin item when authenticated
   const menuItems = [
     {
       key: 'bdteque',
@@ -289,38 +299,26 @@ const BDHomepage = ({ onNavigate }) => {
       icon: <InfoCircleOutlined />,
       label: 'Sur Nous',
     },
+    // Add admin menu item only if authenticated and user is admin
+    ...(isAuthenticated && currentUser?.is_admin ? [{
+      key: 'admin',
+      icon: <SettingOutlined />,
+      label: 'Admin',
+    }] : []),
+    // Show different login/logout option based on auth status
     {
-      key: 'login',
-      icon: <UserOutlined />,
-      label: 'Login',
+      key: isAuthenticated ? 'logout' : 'login',
+      icon: isAuthenticated ? <LogoutOutlined /> : <UserOutlined />,
+      label: isAuthenticated ? `Logout (${currentUser?.username})` : 'Login',
     },
   ];
 
   const handleMenuClick = ({ key }) => {
-    setSelectedMenuItem(key);
-    // Handle navigation logic here
-    switch (key) {
-      case 'bdteque':
-        // Already on the main page
-        break;
-      case 'nos-actis':
-        // Open Facebook page in new tab
-        window.open('https://www.facebook.com/Kot.BD', '_blank');
-        break;
-      case 'sur-nous':
-        // Navigate to about page
-        if (onNavigate) {
-          onNavigate('sur-nous');
-        }
-        break;
-      case 'login':
-        // Navigate to login page
-        if (onNavigate) {
-          onNavigate('login');
-        }
-        break;
-      default:
-        break;
+    if (key === 'logout') {
+      onLogout();
+    } else {
+      setSelectedMenuItem(key);
+      onNavigate && onNavigate(key);
     }
   };
 

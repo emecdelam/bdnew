@@ -94,6 +94,11 @@ const Login = ({ onNavigate }) => {
         setCurrentUser(data.user);
         setIsAuthenticated(true);
         message.success('Connexion réussie !');
+        
+        // Call the success callback if provided
+        if (onLoginSuccess) {
+          onLoginSuccess(data.access_token, data.user);
+        }
       } else {
         message.error(data.detail || 'Erreur de connexion');
       }

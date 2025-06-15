@@ -211,6 +211,75 @@ def admin_list_bds(
     
     return query.offset(skip).limit(limit).all()
 
+# Protected admin routes (require authentication and admin privileges)
+@router.get("/admin/stats")
+def get_admin_stats(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get administrative statistics."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    total_bds = db.query(models.BD).count()
+    total_membres = db.query(models.Membres).count()
+    total_locations = db.query(models.Locations).count()
+    active_locations = db.query(models.Locations).filter(models.Locations.fin.is_(None)).count()
+    
+    return {
+        "total_bds": total_bds,
+        "total_membres": total_membres,
+        "total_locations": total_locations,
+        "active_locations": active_locations,
+        "admin_user": current_user.username
+    }
+
+# Protected admin endpoints for each section
+@router.get("/admin/bds/manage")
+def admin_manage_bds(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Admin endpoint for BD management."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    return {"message": "BD management section", "admin": current_user.username}
+
+@router.get("/admin/membres/manage")
+def admin_manage_membres(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Admin endpoint for member management."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    return {"message": "Member management section", "admin": current_user.username}
+
+@router.get("/admin/locations/manage")
+def admin_manage_locations(
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Admin endpoint for location management."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    return {"message": "Location management section", "admin": current_user.username}
+
 # Public routes (no authentication required)
 # List BDs with pagination, search, and sorting
 @router.get("/bds/", response_model=list[schemas.BDBase])
