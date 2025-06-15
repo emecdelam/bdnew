@@ -16,7 +16,7 @@ import NavigationBar from './NavigationBar';
 
 const { Title, Text } = Typography;
 
-const BDHomepage = ({ onNavigate, isAuthenticated, currentUser, onLogout }) => {
+const BDHomepage = ({ onNavigate, currentUser, onLogout }) => {
   const [bds, setBds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -67,7 +67,7 @@ const BDHomepage = ({ onNavigate, isAuthenticated, currentUser, onLogout }) => {
       ellipsis: true,
     },
     {
-      title: 'T.',
+      title: 'Tome',
       dataIndex: 'numtome',
       key: 'numtome',
       width: 40,

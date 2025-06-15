@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { 
   Form, 
   Input, 
@@ -19,10 +19,13 @@ import {
   LoginOutlined,
   UserAddOutlined
 } from '@ant-design/icons';
+import { UserContext } from '../context/UserContext';
 
 const { Title, Text } = Typography;
 
 const Login = ({ onNavigate }) => {
+  const { handleLoginSuccess } = useContext(UserContext);
+
   const [loading, setLoading] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
   const [setupRequired, setSetupRequired] = useState(false);
@@ -31,14 +34,6 @@ const Login = ({ onNavigate }) => {
   const [currentUser, setCurrentUser] = useState(null);
 
   const API_BASE_URL = 'http://localhost:8000';
-
-  const onLoginSuccess = (token, user) => {
-    localStorage.setItem('access_token', token);
-    localStorage.setItem('user_data', JSON.stringify(user));
-    setIsAuthenticated(true);
-    setCurrentUser(user);
-    onNavigate('bdteque');
-  };
 
   // Check if admin setup is required and if user is already authenticated
   useEffect(() => {
@@ -105,8 +100,8 @@ const Login = ({ onNavigate }) => {
         message.success('Connexion réussie !');
         
         // Call the success callback if provided
-        if (onLoginSuccess) {
-          onLoginSuccess(data.access_token, data.user);
+        if (handleLoginSuccess) {
+          handleLoginSuccess(data.access_token, data.user);
         }
       } else {
         message.error(data.detail || 'Erreur de connexion');

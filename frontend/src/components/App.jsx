@@ -3,10 +3,11 @@ import BDHomepageAntd from './BDHomepageAntd';
 import About from './About';
 import Login from './Login';
 import AdminControlPanel from './AdminControlPanel';
+import UserProvider from '../context/UserContext';
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('bdteque');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // not used atm
   const [currentUser, setCurrentUser] = useState(null);
 
   // Check authentication status on app load
@@ -54,10 +55,10 @@ const App = () => {
   const renderPage = () => {
     switch (currentPage) {
       case 'bdteque':
+        console.log("in switch Current user:", currentUser);
         return (
           <BDHomepageAntd 
             onNavigate={setCurrentPage} 
-            isAuthenticated={isAuthenticated}
             currentUser={currentUser}
             onLogout={handleLogout}
           />
@@ -94,8 +95,7 @@ const App = () => {
       default:
         return (
           <BDHomepageAntd 
-            onNavigate={setCurrentPage} 
-            isAuthenticated={isAuthenticated}
+            onNavigate={setCurrentPage}
             currentUser={currentUser}
             onLogout={handleLogout}
           />
@@ -103,7 +103,11 @@ const App = () => {
     }
   };
 
-  return renderPage();
+  return (
+    <UserProvider>
+      {renderPage()}
+    </UserProvider>
+  );
 };
 
 export default App;

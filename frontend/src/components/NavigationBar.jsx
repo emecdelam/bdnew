@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Menu } from 'antd';
 import {
   HomeOutlined,
@@ -8,9 +8,12 @@ import {
   LogoutOutlined,
   LoginOutlined,
 } from '@ant-design/icons';
+import { UserContext } from '../context/UserContext';
 import './NavigationBar.css';
 
-const NavigationBar = ({ currentUser, onNavigate, onLogout }) => {
+const NavigationBar = ({ onNavigate }) => {
+  const { currentUser, isAuthenticated, handleLogout } = useContext(UserContext);
+
   const menuItems = [
     {
       key: 'bdteque',
@@ -27,7 +30,7 @@ const NavigationBar = ({ currentUser, onNavigate, onLogout }) => {
       icon: <InfoCircleOutlined />,
       label: 'Sur Nous',
     },
-    ...(currentUser ? [
+    ...(isAuthenticated ? [
       {
         key: 'admin',
         icon: <SettingOutlined />,
@@ -35,15 +38,17 @@ const NavigationBar = ({ currentUser, onNavigate, onLogout }) => {
       },
     ] : []),
     {
-      key: currentUser ? 'logout' : 'login',
-      icon: currentUser ? <LogoutOutlined /> : <LoginOutlined />,
-      label: currentUser ? `Logout (${currentUser?.username || 'Guest'})` : 'Login',
+      key: isAuthenticated ? 'logout' : 'login',
+      icon: isAuthenticated ? <LogoutOutlined /> : <HomeOutlined />,
+      label: isAuthenticated ? `Logout (${currentUser?.username || 'Guest'})` : 'Login',
     },
   ];
 
   const handleMenuClick = ({ key }) => {
     if (key === 'logout') {
-      onLogout();
+      handleLogout();
+    } else if (key === 'login') {
+      onNavigate('login');
     } else {
       onNavigate(key);
     }

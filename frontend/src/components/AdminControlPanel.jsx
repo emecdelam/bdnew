@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { 
   Layout, 
   Typography, 
@@ -22,11 +22,13 @@ import {
   ArrowLeftOutlined
 } from '@ant-design/icons';
 import NavigationBar from './NavigationBar';
+import { UserContext } from '../context/UserContext';
 
 const { Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-const AdminControlPanel = ({ onNavigate, currentUser, onLogout }) => {
+const AdminControlPanel = ({ onNavigate }) => {
+  const { currentUser } = useContext(UserContext);
   const [activeSection, setActiveSection] = useState('bds');
 
   // Control panel section buttons
@@ -107,7 +109,7 @@ const AdminControlPanel = ({ onNavigate, currentUser, onLogout }) => {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       {/* Top Navigation */}
-      <NavigationBar currentUser={currentUser} onNavigate={onNavigate} onLogout={onLogout} />
+      <NavigationBar currentUser={currentUser} onNavigate={onNavigate} />
 
       <Content style={{ padding: '24px', background: '#f5f5f5' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
