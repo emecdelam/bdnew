@@ -93,7 +93,6 @@ const About = () => {
           </Space>
         </Card>
       </div>
-    </div>
   );
 };
 

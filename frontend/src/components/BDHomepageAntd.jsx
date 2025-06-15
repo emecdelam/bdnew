@@ -352,7 +352,6 @@ const BDHomepage = () => {
           )}
         </div>
       </div>
-    </div>
   );
 };
 
