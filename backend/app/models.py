@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Date, TIMESTAMP, Text, ForeignKey, Boolean
+from sqlalchemy import Column, String, Integer, Date, TIMESTAMP, Text, ForeignKey, Boolean, UniqueConstraint
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -11,12 +11,14 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP)
+    UniqueConstraint("email", name="unique_email")
+    UniqueConstraint("username", name="unique_username")
 
 class BD(Base):
     __tablename__ = "bd"
-    bid = Column(String(255), primary_key=True)
+    bid = Column(Integer, primary_key=True, autoincrement=True)
     cote = Column(String(255), unique=True, nullable=False)
-    titreserie = Column(String(255))
+    titreserie = Column(String(255), nullable=False)
     titrealbum = Column(String(255))
     numtome = Column(String(20))
     scenariste = Column(String(255), nullable=False)
@@ -24,10 +26,11 @@ class BD(Base):
     collection = Column(String(255))
     editeur = Column(String(255))
     genre = Column(String(200))
-    date_creation = Column(TIMESTAMP)
+    date_creation = Column(TIMESTAMP, default="CURRENT_TIMESTAMP")
     date_modification = Column(TIMESTAMP)
     titre_norm = Column(String(255))
     serie_norm = Column(String(255))
+    ISBN = Column(Integer)
     locations = relationship("Locations", back_populates="bd")
 
 class Membres(Base):
@@ -44,28 +47,25 @@ class Membres(Base):
     mail = Column(String(50))
     caution = Column(Integer, nullable=False)
     remarque = Column(Text)
-    bdpass = Column(String(10), default='0')
+    bdpass = Column(String(10), default='0', nullable=False)
     abonnement = Column(Date)
     vip = Column(Integer, default=0)
-    bdpass_rel = relationship("BDPass", back_populates="membre")
+    IBAN = Column(Integer)
+    groupe = Column(String(255))
     locations = relationship("Locations", back_populates="membre")
-
-class BDPass(Base):
-    __tablename__ = "bdpass"
-    mid = Column(Integer, ForeignKey("membres.mid"), primary_key=True)
-    nblocations = Column(String(255))
-    date = Column(Date)
-    membre = relationship("Membres", back_populates="bdpass_rel")
+    UniqueConstraint("nom", "prenom", name="unique_nom_prenom")
 
 class Locations(Base):
     __tablename__ = "locations"
-    bid = Column(String(255), ForeignKey("bd.bid"), primary_key=True)
-    mid = Column(Integer, ForeignKey("membres.mid"), primary_key=True)
-    date = Column(Date, primary_key=True)
+    lid = Column(Integer, nullable=False, primary_key=True, autoincrement=True)
+    bid = Column(Integer, ForeignKey("bd.bid"), nullable=False)
+    mid = Column(Integer, ForeignKey("membres.mid"), nullable=False)
+    date = Column(Date, nullable=False)
     paye = Column(Integer, default=0)
     mail_rappel_1_envoye = Column(Integer, default=0)
     mail_rappel_2_envoye = Column(Integer, default=0)
-    debut = Column(TIMESTAMP)
+    debut = Column(TIMESTAMP, default="CURRENT_TIMESTAMP", nullable=False)
     fin = Column(TIMESTAMP)
     bd = relationship("BD", back_populates="locations")
     membre = relationship("Membres", back_populates="locations")
+    
