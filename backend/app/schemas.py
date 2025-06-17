@@ -75,25 +75,25 @@ class MembresBase(BaseModel):
     bdpass: str = '0'
     abonnement: Optional[date] = None
     vip: bool = False
-    IBAN: Optional[int] = None
+    IBAN: Optional[str] = None
     groupe: Optional[str] = None
 
 class MembresCreate(BaseModel):
     nom: str
     prenom: str
-    gsm: str
-    rue: str
-    numero: int
+    gsm: Optional[str] = None
+    rue: Optional[str] = None
+    numero: Optional[int] = None
     boite: Optional[str] = None
-    codepostal: int
-    ville: str
+    codepostal: Optional[int] = None
+    ville: Optional[str] = None
     mail: Optional[str] = None
     caution: int
     remarque: Optional[str] = None
     bdpass: str = '0'
     abonnement: Optional[date] = None
     vip: bool = False
-    IBAN: Optional[int] = None
+    IBAN: Optional[str] = None
     groupe: Optional[str] = None
 
 class MembresResponse(MembresBase):

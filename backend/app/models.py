@@ -50,7 +50,7 @@ class Membres(Base):
     bdpass = Column(String(10), default='0', nullable=False)
     abonnement = Column(Date)
     vip = Column(Boolean, default=False, nullable=False)
-    IBAN = Column(Integer)
+    IBAN = Column(String(50))
     groupe = Column(String(255))
     locations = relationship("Locations", back_populates="membre")
     UniqueConstraint("nom", "prenom", name="unique_nom_prenom")

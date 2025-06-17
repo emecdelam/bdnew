@@ -704,3 +704,72 @@ def rent_book_to_member(
     db.refresh(new_rental)
     
     return {"message": "Book rented successfully", "rental_id": new_rental.lid}
+
+@router.post("/admin/membres/")
+def create_member(
+    member_data: schemas.MembresCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new member."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    # Check if member with same name already exists
+    existing_member = db.query(models.Membres).filter(
+        models.Membres.nom == member_data.nom,
+        models.Membres.prenom == member_data.prenom
+    ).first()
+    
+    if existing_member:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Un membre avec ce nom et prénom existe déjà"
+        )
+    
+    # Create new member
+    new_member = models.Membres(
+        nom=member_data.nom,
+        prenom=member_data.prenom,
+        gsm=member_data.gsm,
+        rue=member_data.rue,
+        numero=member_data.numero,
+        boite=member_data.boite,
+        codepostal=member_data.codepostal,
+        ville=member_data.ville,
+        mail=member_data.mail,
+        caution=member_data.caution,
+        remarque=member_data.remarque,
+        bdpass='0',  # Default value
+        abonnement=None,  # Will be set later if needed
+        vip=False,  # Default value
+        IBAN=member_data.IBAN,
+        groupe=member_data.groupe
+    )
+    
+    db.add(new_member)
+    db.commit()
+    db.refresh(new_member)
+    
+    return {
+        "mid": new_member.mid,
+        "nom": new_member.nom,
+        "prenom": new_member.prenom,
+        "gsm": new_member.gsm,
+        "rue": new_member.rue,
+        "numero": new_member.numero,
+        "boite": new_member.boite,
+        "codepostal": new_member.codepostal,
+        "ville": new_member.ville,
+        "mail": new_member.mail,
+        "caution": new_member.caution,
+        "remarque": new_member.remarque,
+        "bdpass": new_member.bdpass,
+        "abonnement": new_member.abonnement,
+        "vip": new_member.vip,
+        "IBAN": new_member.IBAN,
+        "groupe": new_member.groupe
+    }
