@@ -22,24 +22,25 @@ create table bd
 
 create table membres
 (
-    mid        int auto_increment
+    mid           int auto_increment
         primary key,
-    nom        varchar(255)            not null,
-    prenom     varchar(255)            not null,
-    gsm        varchar(15)             not null,
-    rue        varchar(255)            not null,
-    numero     int                     not null,
-    boite      varchar(10)             null,
-    codepostal int                     not null,
-    ville      varchar(255)            not null,
-    mail       varchar(50)             null,
-    caution    int                     not null,
-    remarque   longtext                null,
-    bdpass     varchar(10) default '0' not null,
-    abonnement date                    null,
-    vip        tinyint(1)  default 0   not null,
-    IBAN       int                     null,
-    groupe     varchar(255)            null,
+    nom           varchar(255)                          not null,
+    prenom        varchar(255)                          not null,
+    gsm           varchar(15)                           not null,
+    rue           varchar(255)                          not null,
+    numero        int                                   not null,
+    boite         varchar(10)                           null,
+    codepostal    int                                   not null,
+    ville         varchar(255)                          not null,
+    mail          varchar(50)                           null,
+    caution       int                                   not null,
+    remarque      longtext                              null,
+    bdpass        varchar(10) default '0'               not null,
+    abonnement    date                                  null,
+    vip           tinyint(1)  default 0                 not null,
+    IBAN          int                                   null,
+    groupe        varchar(255)                          null,
+    creation_date timestamp   default CURRENT_TIMESTAMP not null,
     constraint nom
         unique (nom, prenom)
 )
