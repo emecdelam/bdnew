@@ -14,9 +14,7 @@ import {
   Row, 
   Col, 
   Divider,
-  Tag,
-  DatePicker,
-  Switch
+  Tag
 } from 'antd';
 import { 
   UserOutlined, 
@@ -53,7 +51,7 @@ const AbonnementsSection = () => {
   });
   const [bdPagination, setBdPagination] = useState({
     current: 1,
-    pageSize: 50,
+    pageSize: 25,
     total: 0,
   });
 
@@ -113,7 +111,6 @@ const AbonnementsSection = () => {
         setMemberDetails(memberData);
         editForm.setFieldsValue({
           ...memberData,
-          abonnement: memberData.abonnement ? dayjs(memberData.abonnement) : null,
         });
       } else {
         message.error('Erreur lors du chargement des détails du membre');
@@ -181,15 +178,11 @@ const AbonnementsSection = () => {
   const saveMemberChanges = async () => {
     try {
       const values = await editForm.validateFields();
-      const formattedValues = {
-        ...values,
-        abonnement: values.abonnement ? values.abonnement.format('YYYY-MM-DD') : null,
-      };
 
       const response = await fetch(`${API_BASE_URL}/admin/membres/${memberDetails.mid}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
-        body: JSON.stringify(formattedValues),
+        body: JSON.stringify(values),
       });
 
       if (response.ok) {
@@ -329,12 +322,6 @@ const AbonnementsSection = () => {
           {count} BD{count > 1 ? 's' : ''}
         </Tag>
       ),
-    },
-    {
-      title: 'Abonnement',
-      dataIndex: 'abonnement',
-      key: 'abonnement',
-      render: (date) => date ? dayjs(date).format('DD/MM/YYYY') : 'Non défini',
     },
   ];
 
@@ -526,7 +513,6 @@ const AbonnementsSection = () => {
                       setHasUnsavedChanges(false);
                       editForm.setFieldsValue({
                         ...memberDetails,
-                        abonnement: memberDetails.abonnement ? dayjs(memberDetails.abonnement) : null,
                       });
                     }}
                   >
@@ -554,6 +540,11 @@ const AbonnementsSection = () => {
               </Col>
               <Col span={12}>
                 <Form.Item label="Prénom" name="prenom" rules={[{ required: true }]}>
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col span={24}>
+                <Form.Item label="Groupe" name="groupe">
                   <Input />
                 </Form.Item>
               </Col>
@@ -593,23 +584,8 @@ const AbonnementsSection = () => {
                 </Form.Item>
               </Col>
               <Col span={8}>
-                <Form.Item label="Groupe" name="groupe">
-                  <Input />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
                 <Form.Item label="Caution" name="caution" rules={[{ required: true }]}>
                   <Input type="number" />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item label="Abonnement" name="abonnement">
-                  <DatePicker style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col span={8}>
-                <Form.Item label="VIP" name="vip" valuePropName="checked">
-                  <Switch />
                 </Form.Item>
               </Col>
               <Col span={24}>
