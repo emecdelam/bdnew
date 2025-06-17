@@ -101,6 +101,12 @@ class MembresResponse(MembresBase):
     class Config:
         from_attributes = True
 
+class MembresWithRentals(MembresResponse):
+    active_rentals: int = 0
+    
+    class Config:
+        from_attributes = True
+
 class BDPassBase(BaseModel):
     mid: int
     nblocations: Optional[str]

@@ -378,24 +378,290 @@ def get_bd(bid: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="BD not found")
     return bd
 
-# List all Membres
-@router.get("/membres/", response_model=list[schemas.MembresBase])
-def list_membres(
+# Member management routes
+@router.get("/admin/membres/")
+def get_members_with_rental_count(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=100),
+    search: Optional[str] = Query(None, description="Search term for member name"),
+    current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    return db.query(models.Membres).offset(skip).limit(limit).all()
+    """Get members with their active rental count."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    query = db.query(models.Membres)
+    
+    # Apply search filter if provided
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                models.Membres.nom.ilike(search_term),
+                models.Membres.prenom.ilike(search_term),
+                models.Membres.groupe.ilike(search_term)
+            )
+        )
+    
+    members = query.offset(skip).limit(limit).all()
+    
+    # Add rental count to each member
+    result = []
+    for member in members:
+        active_rentals = db.query(models.Locations).filter(
+            models.Locations.mid == member.mid,
+            models.Locations.fin.is_(None)
+        ).count()
+        
+        member_dict = {
+            "mid": member.mid,
+            "nom": member.nom,
+            "prenom": member.prenom,
+            "gsm": member.gsm,
+            "rue": member.rue,
+            "numero": member.numero,
+            "boite": member.boite,
+            "codepostal": member.codepostal,
+            "ville": member.ville,
+            "mail": member.mail,
+            "caution": member.caution,
+            "remarque": member.remarque,
+            "bdpass": member.bdpass,
+            "abonnement": member.abonnement,
+            "vip": member.vip,
+            "IBAN": member.IBAN,
+            "groupe": member.groupe,
+            "active_rentals": active_rentals
+        }
+        result.append(member_dict)
+    
+    return result
 
-# Get BD statistics
-@router.get("/stats/")
-def get_stats(db: Session = Depends(get_db)):
-    total_bds = db.query(models.BD).count()
-    total_membres = db.query(models.Membres).count()
-    total_locations = db.query(models.Locations).count()
+@router.get("/admin/membres/count")
+def get_members_count(
+    search: Optional[str] = Query(None, description="Search term for member name"),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get total count of members."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    query = db.query(models.Membres)
+    
+    if search:
+        search_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                models.Membres.nom.ilike(search_term),
+                models.Membres.prenom.ilike(search_term),
+                models.Membres.groupe.ilike(search_term)
+            )
+        )
+    
+    total = query.count()
+    return {"total": total}
+
+@router.get("/admin/membres/{member_id}")
+def get_member_details(
+    member_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get detailed member information."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    member = db.query(models.Membres).filter(models.Membres.mid == member_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
     
     return {
-        "total_bds": total_bds,
-        "total_membres": total_membres,
-        "total_locations": total_locations
+        "mid": member.mid,
+        "nom": member.nom,
+        "prenom": member.prenom,
+        "gsm": member.gsm,
+        "rue": member.rue,
+        "numero": member.numero,
+        "boite": member.boite,
+        "codepostal": member.codepostal,
+        "ville": member.ville,
+        "mail": member.mail,
+        "caution": member.caution,
+        "remarque": member.remarque,
+        "bdpass": member.bdpass,
+        "abonnement": member.abonnement,
+        "vip": member.vip,
+        "IBAN": member.IBAN,
+        "groupe": member.groupe
     }
+
+@router.put("/admin/membres/{member_id}")
+def update_member(
+    member_id: int,
+    member_data: schemas.MembresCreate,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update member information."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    member = db.query(models.Membres).filter(models.Membres.mid == member_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    # Update member fields
+    for field, value in member_data.dict(exclude_unset=True).items():
+        setattr(member, field, value)
+    
+    db.commit()
+    db.refresh(member)
+    
+    return {
+        "mid": member.mid,
+        "nom": member.nom,
+        "prenom": member.prenom,
+        "gsm": member.gsm,
+        "rue": member.rue,
+        "numero": member.numero,
+        "boite": member.boite,
+        "codepostal": member.codepostal,
+        "ville": member.ville,
+        "mail": member.mail,
+        "caution": member.caution,
+        "remarque": member.remarque,
+        "bdpass": member.bdpass,
+        "abonnement": member.abonnement,
+        "vip": member.vip,
+        "IBAN": member.IBAN,
+        "groupe": member.groupe
+    }
+
+@router.get("/admin/membres/{member_id}/rentals")
+def get_member_rentals(
+    member_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get member's current rentals."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    rentals = db.query(models.Locations, models.BD).join(
+        models.BD, models.Locations.bid == models.BD.bid
+    ).filter(
+        models.Locations.mid == member_id,
+        models.Locations.fin.is_(None)
+    ).all()
+    
+    result = []
+    for location, bd in rentals:
+        result.append({
+            "lid": location.lid,
+            "bid": location.bid,
+            "date": location.date,
+            "debut": location.debut,
+            "bd_info": {
+                "bid": bd.bid,
+                "cote": bd.cote,
+                "titreserie": bd.titreserie,
+                "titrealbum": bd.titrealbum,
+                "numtome": bd.numtome,
+                "scenariste": bd.scenariste,
+                "dessinateur": bd.dessinateur
+            }
+        })
+    
+    return result
+
+@router.post("/admin/rentals/{rental_id}/return")
+def return_book(
+    rental_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Mark a book as returned."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    rental = db.query(models.Locations).filter(models.Locations.lid == rental_id).first()
+    if not rental:
+        raise HTTPException(status_code=404, detail="Rental not found")
+    
+    if rental.fin is not None:
+        raise HTTPException(status_code=400, detail="Book already returned")
+    
+    rental.fin = datetime.utcnow()
+    db.commit()
+    
+    return {"message": "Book returned successfully", "rental_id": rental_id}
+
+@router.post("/admin/membres/{member_id}/rent/{bd_id}")
+def rent_book_to_member(
+    member_id: int,
+    bd_id: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Rent a book to a member."""
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    
+    # Check if member exists
+    member = db.query(models.Membres).filter(models.Membres.mid == member_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    # Check if BD exists
+    bd = db.query(models.BD).filter(models.BD.bid == bd_id).first()
+    if not bd:
+        raise HTTPException(status_code=404, detail="BD not found")
+    
+    # Check if book is already rented
+    existing_rental = db.query(models.Locations).filter(
+        models.Locations.bid == bd_id,
+        models.Locations.fin.is_(None)
+    ).first()
+    
+    if existing_rental:
+        raise HTTPException(status_code=400, detail="Book is already rented")
+    
+    # Create new rental
+    new_rental = models.Locations(
+        bid=bd_id,
+        mid=member_id,
+        date=datetime.now().date(),
+        debut=datetime.utcnow(),
+        paye=False,
+        mail_rappel_1_envoye=False,
+        mail_rappel_2_envoye=False
+    )
+    
+    db.add(new_rental)
+    db.commit()
+    db.refresh(new_rental)
+    
+    return {"message": "Book rented successfully", "rental_id": new_rental.lid}
