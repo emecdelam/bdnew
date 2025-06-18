@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, cast, Integer
 from typing import Optional
 from datetime import datetime, timedelta
+import re
 from . import models, schemas
 from .database import SessionLocal
 from .auth import verify_password, get_password_hash, create_access_token, verify_token
@@ -728,6 +729,13 @@ def create_member(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Un membre avec ce nom et prénom existe déjà"
+        )
+    
+    # Validate email format
+    if member_data.mail and not re.match(r"[^@]+@[^@]+\.[^@]+", member_data.mail):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Adresse e-mail invalide"
         )
     
     # Create new member

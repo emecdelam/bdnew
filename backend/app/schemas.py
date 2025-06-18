@@ -90,9 +90,6 @@ class MembresCreate(BaseModel):
     mail: Optional[str] = None
     caution: int
     remarque: Optional[str] = None
-    bdpass: str = '0'
-    abonnement: Optional[date] = None
-    vip: bool = False
     IBAN: Optional[str] = None
     groupe: Optional[str] = None
 

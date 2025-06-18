@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { 
   Typography, 
   Card, 
@@ -44,6 +44,9 @@ const AbonnementsSection = () => {
   const [availableBDs, setAvailableBDs] = useState([]);
   const [bdSearchTerm, setBdSearchTerm] = useState('');
   const [memberSearchTerm, setMemberSearchTerm] = useState('');
+  const [isNewMemberModalVisible, setIsNewMemberModalVisible] = useState(false);
+  const [newMemberForm] = Form.useForm();
+  const [creatingMember, setCreatingMember] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 50,
@@ -314,6 +317,47 @@ const AbonnementsSection = () => {
     setHasUnsavedChanges(true);
   };
 
+  // Create new member function
+  const createNewMember = async () => {
+    try {
+      setCreatingMember(true);
+      const values = await newMemberForm.validateFields();
+      
+      const response = await fetch(`${API_BASE_URL}/admin/membres/`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        const newMember = await response.json();
+        message.success('Membre créé avec succès!');
+        setIsNewMemberModalVisible(false);
+        newMemberForm.resetFields();
+        
+        // Refresh the members list
+        await fetchMembers(1, memberSearchTerm);
+        
+        // Open the newly created member details
+        handleMemberSelect(newMember);
+      } else {
+        const errorData = await response.json();
+        message.error(errorData.detail || 'Erreur lors de la création du membre');
+      }
+    } catch (error) {
+      console.error('Error creating member:', error);
+      message.error('Erreur de connexion');
+    } finally {
+      setCreatingMember(false);
+    }
+  };
+
+  // Handle new member modal cancel
+  const handleNewMemberCancel = () => {
+    newMemberForm.resetFields();
+    setIsNewMemberModalVisible(false);
+  };
+
   useEffect(() => {
     fetchMembers();
   }, []);
@@ -455,7 +499,8 @@ const AbonnementsSection = () => {
   if (!selectedMember) {
     // Show members list
     return (
-      <Card>
+      <Fragment>
+        <Card>
         <div style={{ marginBottom: 16 }}>
           <Title level={3}>
             <UserOutlined style={{ marginRight: 8, color: '#52c41a' }} />
@@ -466,7 +511,7 @@ const AbonnementsSection = () => {
           </Text>
         </div>
 
-        <div style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Search
             placeholder="Rechercher un membre..."
             value={memberSearchTerm}
@@ -475,6 +520,13 @@ const AbonnementsSection = () => {
             style={{ width: 300 }}
             allowClear
           />
+          <Button 
+            type="primary" 
+            icon={<PlusOutlined />}
+            onClick={() => setIsNewMemberModalVisible(true)}
+          >
+            Nouveau Membre
+          </Button>
         </div>
 
         <Table
@@ -498,6 +550,152 @@ const AbonnementsSection = () => {
           }}
         />
       </Card>
+
+      {/* New Member Modal */}
+      <Modal
+        title="Créer un nouveau membre"
+        open={isNewMemberModalVisible}
+        onOk={createNewMember}
+        onCancel={handleNewMemberCancel}
+        confirmLoading={creatingMember}
+        okText="Créer"
+        cancelText="Annuler"
+        width={800}
+      >
+        <Form
+          form={newMemberForm}
+          layout="vertical"
+        >
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Nom"
+                name="nom"
+                rules={[{ required: true, message: 'Le nom est obligatoire' }]}
+              >
+                <Input placeholder="Nom de famille" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Prénom"
+                name="prenom"
+                rules={[{ required: true, message: 'Le prénom est obligatoire' }]}
+              >
+                <Input placeholder="Prénom" />
+              </Form.Item>
+            </Col>
+          </Row>            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label="GSM"
+                  name="gsm"
+                >
+                  <Input placeholder="0XXX XX XX XX" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  label="Email"
+                  name="mail"
+                  rules={[
+                    { type: 'email', message: 'Format d\'email invalide' }
+                  ]}
+                >
+                  <Input placeholder="email@exemple.com" />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  label="Rue"
+                  name="rue"
+                >
+                  <Input placeholder="Nom de la rue" />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label="Numéro"
+                  name="numero"
+                >
+                  <Input placeholder="123" />
+                </Form.Item>
+              </Col>
+              <Col span={6}>
+                <Form.Item
+                  label="Boîte"
+                  name="boite"
+                >
+                  <Input placeholder="A, B, etc." />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Row gutter={16}>
+              <Col span={8}>
+                <Form.Item
+                  label="Code Postal"
+                  name="codepostal"
+                >
+                  <Input placeholder="1000" />
+                </Form.Item>
+              </Col>
+              <Col span={16}>
+                <Form.Item
+                  label="Ville"
+                  name="ville"
+                >
+                  <Input placeholder="Bruxelles" />
+                </Form.Item>
+              </Col>
+            </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Caution (€)"
+                name="caution"
+                rules={[{ required: true, message: 'La caution est obligatoire' }]}
+              >
+                <Input placeholder="50" type="number" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="IBAN"
+                name="IBAN"
+              >
+                <Input placeholder="BE68 5390 0754 7034" />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Groupe"
+                name="groupe"
+              >
+                <Input placeholder="Étudiants, Professeurs, etc." />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item
+            label="Remarque"
+            name="remarque"
+          >
+            <Input.TextArea 
+              placeholder="Remarques ou notes supplémentaires..." 
+              rows={3}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
+      </Fragment>
     );
   }
 
@@ -607,14 +805,19 @@ const AbonnementsSection = () => {
                   <Input type="number" />
                 </Form.Item>
               </Col>
-              <Col span={4}>
+              <Col span={8}>
                 <Form.Item label="Ville" name="ville" rules={[{ required: true }]}>
                   <Input />
                 </Form.Item>
               </Col>
-              <Col span={8}>
+              <Col span={12}>
                 <Form.Item label="Caution" name="caution" rules={[{ required: true }]}>
                   <Input type="number" />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item label="IBAN" name="IBAN">
+                  <Input />
                 </Form.Item>
               </Col>
               <Col span={24}>
@@ -627,12 +830,12 @@ const AbonnementsSection = () => {
         )}
       </Card>
 
-      {/* Current Rentals */}
+      {/* Member Rentals Card */}
       <Card 
         title={
           <span>
             <BookOutlined style={{ marginRight: 8 }} />
-            Livres actuellement loués ({memberRentals.length})
+            Livres actuellement loués
           </span>
         }
         style={{ marginBottom: 24 }}
