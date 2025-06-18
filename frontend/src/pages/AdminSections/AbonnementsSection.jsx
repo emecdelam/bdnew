@@ -237,6 +237,8 @@ const AbonnementsSection = () => {
         message.success('Livre retourné avec succès');
         fetchMemberRentals(selectedMember);
         fetchMembers(pagination.current, memberSearchTerm);
+        // Refresh the available BDs table to show the returned book
+        fetchAvailableBDs(bdPagination.current, bdSearchTerm);
       } else {
         message.error('Erreur lors du retour du livre');
       }
@@ -258,6 +260,8 @@ const AbonnementsSection = () => {
         message.success('Livre loué avec succès');
         fetchMemberRentals(selectedMember);
         fetchMembers(pagination.current, memberSearchTerm);
+        // Refresh the available BDs table to update the rented book status
+        fetchAvailableBDs(bdPagination.current, bdSearchTerm);
       } else {
         const error = await response.json();
         message.error(error.detail || 'Erreur lors de la location du livre');
