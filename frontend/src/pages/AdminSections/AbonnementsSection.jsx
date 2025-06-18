@@ -294,7 +294,11 @@ const AbonnementsSection = () => {
       title: 'Nom',
       dataIndex: 'nom',
       key: 'nom',
-      render: (text, record) => `${record.nom} ${record.prenom}`,
+    },
+    {
+      title: 'Prénom',
+      dataIndex: 'prenom',
+      key: 'prenom',
     },
     {
       title: 'Groupe',
