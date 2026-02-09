@@ -26,11 +26,11 @@ def create_admin_user():
     """Create an admin user interactively."""
     db = SessionLocal()
     try:
-        # Check if any users exist
-        existing_users = db.query(models.User).count()
-        if existing_users > 0:
-            print("❌ Admin user already exists. Skipping user creation.")
-            return
+        # # Check if any users exist
+        # existing_users = db.query(models.User).count()
+        # if existing_users > 0:
+        #     print("❌ Admin user already exists. Skipping user creation.")
+        #     return
 
         print("\n--- Creating Admin User ---")
         username = input("Enter admin username: ").strip()
