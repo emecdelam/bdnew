@@ -44,6 +44,8 @@
 
 docker compose -f docker-compose.dev.yml -f docker-compose.yml up
 
+Website is accessible on http://127.0.0.1:4173
+
 ### On the llnux server
 
 docker compose -f docker-compose.prod.yml -f docker-compose.yml up

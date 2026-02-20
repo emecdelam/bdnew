@@ -5,11 +5,9 @@ import react from '@vitejs/plugin-react'
 export default ({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const backendUrl = env.VITE_BACKEND_URL || 'http://127.0.0.1:8001'
-  const disableHMR = env.VITE_DISABLE_HMR ? true : false;
   return defineConfig({
     plugins: [react()],
     server: {
-      hmr: !disableHMR,
       allowedHosts: ['.kapucl.be', 'kotbd.kapucl.be'],
       proxy: {
         '/api': {
