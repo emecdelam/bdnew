@@ -37,6 +37,18 @@
 4. `npm run dev`
 
 
+
+## Run within docker
+
+### On your local machine
+
+docker compose -f docker-compose.dev.yml -f docker-compose.yml up
+
+### On the llnux server
+
+docker compose -f docker-compose.prod.yml -f docker-compose.yml up
+
+
 ---
 
 ### Current progress
