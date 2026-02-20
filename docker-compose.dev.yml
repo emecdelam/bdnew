@@ -1,0 +1,8 @@
+services:
+  bd_backend:
+    ports:
+      - 8001:8001
+  bd_frontend:
+    ports:
+      - 4173:4173
+

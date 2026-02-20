@@ -1,7 +1,6 @@
 services:
-  db:
+  bd_database:
     image: mysql:8.0.36
-    container_name: mysql-bookdb
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -13,35 +12,27 @@ services:
       # Initialize the DB on first container start by placing SQL here
       - ./backend/sqlDumps/dump-bookdb-202506172110.sql:/docker-entrypoint-initdb.d/dump-bookdb-202506172110.sql:ro
 
-  backend:
+  bd_backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: bd-backend
     restart: unless-stopped
     env_file:
       - ./backend/.env
     environment:
-      - DATABASE_URL=mysql+pymysql://appuser:apppassword@db:3306/bookdb
+      - DATABASE_URL=mysql+pymysql://appuser:apppassword@bd_database:3306/bookdb
     depends_on:
-      - db
-    networks:
-      - default
-      - external
+      - bd_database
 
-  frontend:
+  bd_frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: bd-frontend
+    environment:
+      - VITE_BACKEND_URL=http://bd_backend:8001
     depends_on:
-      - backend
-    networks:
-      - external
+      - bd_backend
 
 volumes:
   db_data:
 
-networks:
-  external:
-    external: true
