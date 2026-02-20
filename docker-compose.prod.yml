@@ -1,0 +1,8 @@
+services:
+  bd_frontend:
+    networks:
+      - external
+networks:
+  external:
+    external: true
+
